@@ -93,6 +93,131 @@ $(function () {
 	$('#blogCarousel').carousel({
 		interval: 5000
 	});
+    
+    
+    
+//    ==========================================
+//        Send Customer Contact Request
+        
+        // Get the contents of the Contact Request Data Store
+        function getDataStore() {
+          var visitorList;
+          var storedData;
+          var index = 1;
+          $.ajax({
+            url: "https://api.jsonbin.io/v3/b/63d73973ace6f33a22cdb492",
+            method: "Get",
+              headers : {
+                'X-Master-Key' : '$2b$10$n1b5ZZoBznlH6lKNu2S2W.oWE3Db9OUpAQiNtZ/dLDmhskCcSBpfi'
+            },
+            success: function(data){
+              storedData = data;
+//              console.log(data);
+            },
+            complete: function() {
+                fetchGeoData(storedData);
+//                addNewVisitor(data);
+            }
+          });
+        }
+    
+     // Get visiting GEO Data
+        function fetchGeoData(storedData) {
+            fetch('https://ipapi.co/json/')
+          .then(function(response) {
+            return response.json();
+          })
+          .then(function(newData) {
+//            console.log(newData);
+            addToDataStore(storedData, newData);
+          });
+        }
+    
+     // Add visitor GeoData to DataStore
+        function addToDataStore(storedData, geoData) {
+            
+            // capture form input data
+             var contactName = $("#contactName").val();
+             var contactNumber = $("#contactNumber").val();
+             var contactEmail = $("#contactEmail").val();
+             var contactMessage = $("#contactMessage").val();
+        
+            // Create visitor object for datastore
+            var newVisitor = {
+                fullName: contactName,
+                phoneNumber: contactNumber,
+                email: contactEmail,
+                message: contactMessage,
+                city: geoData.city,
+                country: geoData.country,
+                countryCode: geoData.country_code,
+                isp: geoData.isp,
+                org: geoData.org,
+                ip: geoData.ip,
+                region: geoData.region,
+                regionName: geoData.region,
+                timezone: geoData.timezone,
+                zip: geoData.postal,
+                platform: navigator.platform,
+                browser: navigator.vendor,
+                time: new Date( new Date().toUTCString() ).toLocaleString()
+              };
+            
+            
+            var updatedData;
+            storedData.record.push(newVisitor);
+            updatedData = storedData.record;
+            
+            // Upload GeoData Object to Store
+            var request = new XMLHttpRequest();
+
+            request.onreadystatechange = () => {
+              if (request.readyState == XMLHttpRequest.DONE) {
+                console.log(request.responseText);
+              }
+            };
+
+            request.open("PUT", "https://api.jsonbin.io/v3/b/63d73973ace6f33a22cdb492", true);
+            request.setRequestHeader("Content-Type", "application/json");
+            request.setRequestHeader("X-Master-Key", "$2b$10$n1b5ZZoBznlH6lKNu2S2W.oWE3Db9OUpAQiNtZ/dLDmhskCcSBpfi");
+            request.send(JSON.stringify(updatedData));
+            
+        }
+    
+   $("#send_btn").click(function() {
+       setTimeout(function () {
+		$('.loader_bg').fadeToggle();
+	   }, 1500);
+      getDataStore();
+   })
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
 
 });
